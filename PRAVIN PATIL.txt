@@ -1,0 +1,244 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+// Class representing a user
+class User {
+    private String username;
+    private String password;
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public boolean checkPassword(String password) {
+        return this.password.equals(password);
+    }
+}
+
+// Class representing a food item
+class FoodItem {
+    private String name;
+    private double price;
+
+    public FoodItem(String name, double price) {
+        this.name = name;
+        this.price = price;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    @Override
+    public String toString() {
+        return name + ": $" + price;
+    }
+}
+
+// Class for displaying the menu and handling orders
+class Menu {
+    private ArrayList<FoodItem> foodItems = new ArrayList<>();
+
+    public Menu() {
+        // Add some sample food items
+        foodItems.add(new FoodItem("Burger", 5.99));
+        foodItems.add(new FoodItem("Pizza", 8.99));
+        foodItems.add(new FoodItem("Sushi", 12.49));
+        foodItems.add(new FoodItem("Pasta", 7.49));
+        foodItems.add(new FoodItem("Salad", 4.49));
+    }
+
+    public void displayMenu() {
+        System.out.println("\n----- Menu -----");
+        for (int i = 0; i < foodItems.size(); i++) {
+            System.out.println((i + 1) + ". " + foodItems.get(i));
+        }
+    }
+
+    public FoodItem getFoodItem(int index) {
+        if (index >= 0 && index < foodItems.size()) {
+            return foodItems.get(index);
+        }
+        return null;
+    }
+}
+
+// Class for managing user orders
+class Order {
+    private ArrayList<FoodItem> cart = new ArrayList<>();
+
+    public void addItem(FoodItem item) {
+        if (item != null) {
+            cart.add(item);
+            System.out.println(item.getName() + " added to the cart.");
+        }
+    }
+
+    public void viewCart() {
+        if (cart.isEmpty()) {
+            System.out.println("Your cart is empty.");
+            return;
+        }
+
+        System.out.println("\n----- Your Cart -----");
+        double total = 0;
+        for (FoodItem item : cart) {
+            System.out.println(item);
+            total += item.getPrice();
+        }
+        System.out.println("Total: $" + total);
+    }
+
+    public void checkout() {
+        if (cart.isEmpty()) {
+            System.out.println("Your cart is empty. Cannot checkout.");
+            return;
+        }
+
+        double total = 0;
+        for (FoodItem item : cart) {
+            total += item.getPrice();
+        }
+
+        System.out.println("\n----- Checkout -----");
+        System.out.println("Total amount: $" + total);
+        System.out.println("Thank you for your order!");
+        cart.clear(); // Clear cart after checkout
+    }
+}
+
+// Class for handling user login and registration
+class Auth {
+    private ArrayList<User> users = new ArrayList<>();
+    private User currentUser;
+
+    public void register(String username, String password) {
+        users.add(new User(username, password));
+        System.out.println("User " + username + " registered successfully.");
+    }
+
+    public boolean login(String username, String password) {
+        for (User user : users) {
+            if (user.getUsername().equals(username) && user.checkPassword(password)) {
+                currentUser = user;
+                System.out.println("Login successful! Welcome, " + username);
+                return true;
+            }
+        }
+        System.out.println("Invalid username or password.");
+        return false;
+    }
+
+    public boolean isLoggedIn() {
+        return currentUser != null;
+    }
+}
+
+// Main class to drive the food delivery system
+public class FoodDeliverySystem {
+    private static Scanner scanner = new Scanner(System.in);
+    private static Auth auth = new Auth();
+    private static Menu menu = new Menu();
+    private static Order order = new Order();
+
+    public static void main(String[] args) {
+        boolean running = true;
+
+        while (running) {
+            System.out.println("\n----- Online Food Delivery System -----");
+            System.out.println("1. Register");
+            System.out.println("2. Login");
+            System.out.println("3. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    register();
+                    break;
+                case 2:
+                    if (login()) {
+                        userMenu();
+                    }
+                    break;
+                case 3:
+                    running = false;
+                    break;
+                default:
+                    System.out.println("Invalid option. Try again.");
+            }
+        }
+    }
+
+    private static void register() {
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+        auth.register(username, password);
+    }
+
+    private static boolean login() {
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+        return auth.login(username, password);
+    }
+
+    private static void userMenu() {
+        boolean loggedIn = true;
+
+        while (loggedIn) {
+            System.out.println("\n----- User Menu -----");
+            System.out.println("1. View Menu");
+            System.out.println("2. Add Item to Cart");
+            System.out.println("3. View Cart");
+            System.out.println("4. Checkout");
+            System.out.println("5. Logout");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    menu.displayMenu();
+                    break;
+                case 2:
+                    addItemToCart();
+                    break;
+                case 3:
+                    order.viewCart();
+                    break;
+                case 4:
+                    order.checkout();
+                    break;
+                case 5:
+                    loggedIn = false;
+                    System.out.println("Logged out successfully.");
+                    break;
+                default:
+                    System.out.println("Invalid option. Try again.");
+            }
+        }
+    }
+
+    private static void addItemToCart() {
+        menu.displayMenu();
+        System.out.print("Enter item number to add to cart: ");
+        int itemNumber = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+        FoodItem item = menu.getFoodItem(itemNumber - 1);
+        order.addItem(item);
+    }
+}
